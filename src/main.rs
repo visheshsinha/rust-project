@@ -1,3 +1,5 @@
+pub mod fibonnaci;
+
 fn main() {
 
     let mut num: i8 = -123; // i32 - 32 bit , i = signed, u = unsigned (only positive), mut = mutability
@@ -80,6 +82,11 @@ fn main() {
 
     // libs 
     random_num();
+
+    // collections
+    vectors_fn(); // vectors
+    maps_fn(); // hashmaps
+    fibonnaci_fn(); // hashmaps , referencing , borrowing etc
 }
 
 fn get_first_word(sentence: String) -> String {
@@ -223,7 +230,7 @@ impl Rect {
 }
 
 fn cal_rect_area() {
-    let rect = Rect {
+    let rect: Rect = Rect {
         width: 20,
         length: 10
     };
@@ -382,3 +389,73 @@ fn random_num() {
     let n: u32 = rng.gen_range(10..=1000);
     println!("Random Number: {}", n);
 }
+
+fn vectors_fn() {
+    let mut v:Vec<i32> = Vec::new();
+    let v2 = vec![1, 2, 3];
+
+    // same as string - dynamic memory allocation
+    for i in 0..5 {
+        v.push(i);
+        println!("Cap: {}, Len: {}, Pointer: {:p}", v.capacity(), v.len(), v.as_ptr());
+    }
+
+    // handles index out of bound
+    match v.get(20) {
+        Some(third) => println!("The third index value is : {}", third),
+        None => println!("Index doesn't exists") 
+    }
+    
+    // will break at runtime if index is overflown
+    println!("v 1st Index: {}", &v[0]);
+
+    // can't use immutable reference taken before taking a mutable reference, opposite would work
+    /*
+    let second  = &v2[1]; // immutable reference of v2 
+    v2.push(4); // taking a mutable reference and pushing it
+    println!("Second Index of v2: {}", second); // trying to print the immutable reference after */
+
+    println!("v2 vector: {:?}", v2)
+}
+
+use std::collections::HashMap;
+fn maps_fn(){
+    let mut cache = HashMap::new();
+
+    cache.insert(String::from("yellow"), 5);
+    cache.insert(String::from("blue"), 9);
+
+    let mut score_of_yellow = cache.get(&String::from("yellow"));
+
+    match score_of_yellow {
+        Some(value) => println!("Score of yellow : {}", value),
+        None => println!("Score of Yellow not found in Cache Hashmap")
+    };
+
+    // if entry exists do nothing - if doesn't insert
+    cache.entry(String::from("blue")).or_insert(12);
+
+    // update entry
+    cache.insert(String::from("yellow"), 19);
+
+    let score_of_blue = cache.get(&String::from("blue"));
+
+    match score_of_blue {
+        Some(value) => println!("Score of blue : {}", value),
+        None => println!("Score of Blue not found in Cache Hashmap")
+    };
+
+    score_of_yellow = cache.get(&String::from("yellow"));
+
+    match score_of_yellow {
+        Some(value) => println!("Updated Score of yellow : {}", value),
+        None => println!("Score of Yellow not found in Cache Hashmap")
+    };
+}
+
+fn fibonnaci_fn () {
+    let num = 30;
+    let fib = fibonnaci::Fibonnaci;
+    println!("Fibonnaci of the number: {}, is {}", num, fib.fib(num));
+}
+
