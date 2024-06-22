@@ -1,4 +1,5 @@
 pub mod fibonnaci;
+pub mod summary;
 
 fn main() {
 
@@ -87,6 +88,15 @@ fn main() {
     vectors_fn(); // vectors
     maps_fn(); // hashmaps
     fibonnaci_fn(); // hashmaps , referencing , borrowing etc
+
+    // generics
+    generics_fn(); // to reduce code duplications
+
+    // traits
+    traits_fn(); // defining similar behaviour
+
+    // generic lifetime
+    generic_lifetime_fn();
 }
 
 fn get_first_word(sentence: String) -> String {
@@ -458,4 +468,82 @@ fn fibonnaci_fn () {
     let fib = fibonnaci::Fibonnaci;
     println!("Fibonnaci of the number: {}, is {}", num, fib.fib(num));
 }
+
+// to reduce code duplications - using generics
+fn largest<T: PartialOrd + Copy>(vec: &Vec<T>) -> T {
+    /* Traits: 
+    PartialOrd -> Something that can be orderd
+    Copy: Something that can be copied */
+    let mut max = vec[0];
+
+    for i in vec {
+        if *i > max {
+            max = *i;
+        } 
+    }
+    return max;
+}
+
+fn generics_fn() {
+    let mut vec_num = Vec::new();
+    for i in 1..8 {
+        vec_num.push(i * 12)
+    }
+
+    let largest_num = largest(&vec_num);
+    println!("Largest element in vector: {:?} is {}", vec_num, largest_num);
+
+    let vec_char = vec!['a', 'd', 'v', 'm', 'g'];
+    let largest_char = largest(&vec_char);
+    println!("Largest element in vector: {:?} is {}", vec_char, largest_char);
+}
+
+fn traits_fn () {
+    let news_article = summary::Article {
+        author: String::from("Shakespeare"),
+        headline: String::from("Thou shall pass"),
+        content: String::from("value")
+    };
+
+    let tweet = summary::Tweet {
+        author: String::from("@johnwick"),
+        content: String::from("car is not for sale"),
+        reply: false,
+        retweet: true
+    };
+
+    // println!("Summary of the Article: {}", news_article.summarize());
+    // println!("Summary of the Tweet: {}", tweet.summarize());
+
+    notify_fn(&tweet);
+    notify_fn(&news_article);
+}
+
+// fn notify_fn(item : &impl summary::Summary) { // this too will work, using <Generics> below
+fn notify_fn<T: summary::Summary>(item :&T) {
+    println!("Breaking News: {}", item.summarize())
+}
+
+fn generic_lifetime_fn() {
+    let s1 = String::from("hellow");
+    {// ------------------------------------------------------------------------
+        let s2 = String::from("world");                              //| lifetime block
+        let result = longest_str(&s1.as_str(), &s2.as_str());     //| s2 & result are only accessible inside this {}
+        println!("Largest string : {:?}", String::from(result))              //|
+    }// ------------------------------------------------------------------------
+}
+
+/*
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime */
+fn longest_str<'a>(x: &'a str, y: &'a str) -> &'a str {
+    // what we are telling here is the result will be having a lifetime which is the smallest of x & y's lifetimes
+    if x.len() > y.len() {
+        return x;
+    }
+
+    return y;
+}
+
 
