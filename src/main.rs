@@ -83,10 +83,15 @@ fn main() {
 
     // libs 
     random_num();
+    current_time();
 
     // collections
     vectors_fn(); // vectors
     maps_fn(); // hashmaps
+
+    // iterators
+    iterators_fn();
+
     fibonnaci_fn(); // hashmaps , referencing , borrowing etc
 
     // generics
@@ -237,6 +242,9 @@ impl Rect {
     fn perimeter(&self) -> u32 {
         return 2 * (self.width + self.length);
     }
+    fn debug() -> u32 { // acts as a static fn, can't be called on Rect object but directly on Rect struct
+        return 1
+    }
 }
 
 fn cal_rect_area() {
@@ -247,6 +255,7 @@ fn cal_rect_area() {
 
     println!("Area of the Rect is {}", rect.area());
     println!("Perimeter of the Rect is {}", rect.perimeter());
+    println!("Debug - Static Func. -- printing: {}", Rect::debug());
 }
 
 #[allow(dead_code)] // helps you ignore unused codes in compilation
@@ -400,6 +409,17 @@ fn random_num() {
     println!("Random Number: {}", n);
 }
 
+// DATE Time Rust Lib
+use chrono::{Utc, Local};
+
+fn current_time() {
+    let now = Local::now();
+    let utc_now = Utc::now();
+    println!("Local Time is : {}", now);
+    println!("UTC Time is : {}", utc_now);
+}
+
+
 fn vectors_fn() {
     let mut v:Vec<i32> = Vec::new();
     let v2 = vec![1, 2, 3];
@@ -409,6 +429,11 @@ fn vectors_fn() {
         v.push(i);
         println!("Cap: {}, Len: {}, Pointer: {:p}", v.capacity(), v.len(), v.as_ptr());
     }
+
+    println!("Original Vector : {:?}", &v);
+    let even_v: Vec<&i32> = get_even_elements(&v);
+
+    println!("All Even elements of the vector : {:?}", even_v);
 
     // handles index out of bound
     match v.get(20) {
@@ -428,12 +453,26 @@ fn vectors_fn() {
     println!("v2 vector: {:?}", v2)
 }
 
-use std::collections::HashMap;
+fn get_even_elements(v: &Vec<i32>) -> Vec<&i32> {
+    let mut even_v = Vec::new();
+
+
+    for element in v.iter() {
+        if element % 2 == 0{
+            even_v.push(element);
+        }
+    }
+    return even_v
+}
+
+use std::{collections::HashMap};
 fn maps_fn(){
     let mut cache = HashMap::new();
 
     cache.insert(String::from("yellow"), 5);
     cache.insert(String::from("blue"), 9);
+
+    println!("Map in rust: {:?}", cache);
 
     let mut score_of_yellow = cache.get(&String::from("yellow"));
 
@@ -461,6 +500,81 @@ fn maps_fn(){
         Some(value) => println!("Updated Score of yellow : {}", value),
         None => println!("Score of Yellow not found in Cache Hashmap")
     };
+}
+
+fn iterators_fn() {
+    let v1 = vec![1, 2, 3];
+    let v1_iter = v1.iter();
+
+    for element in v1_iter {
+        println!("Iterating , got {}", element)
+    }
+
+    println!("v1 is still valid, as it was only borrowed, {:?}", v1);
+
+    // mutable iterators
+    let mut v2 = vec![4, 5, 6];
+    println!("Old V2 : {:?}", v2);
+
+    let v2_iter = v2.iter_mut();
+    for mutable_element in v2_iter {
+        print!("Got: {}, ", mutable_element);
+        *mutable_element += 3;
+        println!("updated to : {}", mutable_element)
+    }
+    println!("New V2: {:?}", v2);
+
+    // into iter - takes ownership
+    let v3 = vec![10, 11, 12];
+    let v3_iter = v3.into_iter();
+
+    for owned_element in v3_iter {
+        println!("Got : {}", owned_element)
+    }
+
+    // println!("Cant Print v3 as its ownership is moved : {:?}", v3);
+
+    // default iter functions
+    let v4 = vec![15, 17, 19];
+    let sum_v4: i32 = v4.iter().sum(); // consuming adaptor
+
+    println!("Sum of {:?} is {}", v4, sum_v4);
+
+    // iterator adaptor - non consuming
+
+    let v5 = vec![31, 23, 29];
+    let v5_iter = v5.iter();
+    // take x return x + 1, works like lambda functions in python
+    let map_iter = v5_iter.map(|x| x + 1); 
+
+    for iter_element in map_iter {
+        println!("Got x+1, - {}", iter_element)
+    }
+
+    let filter_iter = v5.iter().filter(|x| x <= &&30);
+
+    for filter_iter_element in filter_iter {
+        println!("Got x <= 30, - {}", filter_iter_element)
+    }
+
+    let v6 = vec![12, 13, 14, 15, 16, 17];
+
+    let filtered_v6_odd = v6.iter().filter(|x| *x % 2 != 0);
+    let mut double_odd_v6: Vec<i32> = Vec::new();
+
+    for element in filtered_v6_odd.into_iter() {
+        double_odd_v6.push(element * 2);
+    }
+
+    println!("{:?} filtered odd values & doubled it - {:?}", v6, double_odd_v6);
+
+
+    let v7 = vec![1, 2, 34, 13, 17];
+    let odd_double_v7 = v7.iter().filter(|x| *x % 2 != 0).map(|x| x * 2);
+    let vec_v7: Vec<i32> = odd_double_v7.collect();
+
+    println!("Same thing using map + collect (for iter to vec): {:?}", vec_v7);
+
 }
 
 fn fibonnaci_fn () {
